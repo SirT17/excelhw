@@ -1,0 +1,159 @@
+Sub stockmarket()
+
+'set variables
+Dim ticker As String
+Dim vol As Double
+vol = 0
+
+Dim year_open As Double
+Dim year_close As Double
+
+Cells(1, 9) = "ticker"
+Cells(1, 10) = "YearlyChanges"
+Cells(1, 11) = "YearlyPercentage"
+Cells(1, 12) = "TotalStockVolume"
+
+Dim summary_row_table As Integer
+summary_row_table = 2
+
+On Error Resume Next
+
+'loop through data for one year
+For i = 2 To (70926)
+
+If year_open = 0 Then
+year_open = Cells(i, 3).Value
+End If
+
+openprice = Cells(i, 3).Value
+
+closedprice = Cells(i, 6).Value
+
+'check if within same ticker
+If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+ 
+'set the ticker
+ticker = Cells(i, 1).Value
+
+'add total stock volume
+total_Stock_Volume = openprice - closedprice
+ 
+ 'print the ticker
+ Range("j" & summary_row_table).Value = ticker
+ 
+ 'print the yearly change
+ Range("j" & summary_row_table).Value = yearly_change
+ 
+ 'print the total stock volume
+ Range("k" & summary_row_table).Value = total_stock_value
+ 
+ 'add one to the summary table
+ Summary_Table_Row = Summary_Table_Row + 1
+ 
+ 'add Yearly percent change
+  YearlyChangePercent = openprice - closeprice
+ 
+ 'add percent change
+PercentChange = openprice - closeprice / closeprice
+ 
+ 'reset total stock volume
+ total_Stock_Volume = 0
+ 
+ Else
+ volume = volume + Cells(i, 7)
+ 
+End If
+
+Next i
+End Sub
+
+
+Sub tickerworksheets()
+
+'prevents my overflow error
+On Error Resume Next
+
+'run through each worksheet
+For Each ws In ThisWorkbook.Worksheets
+
+    'set headers
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Stock Volume"
+
+If ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1).Value Then
+year_open = ws.Cells(i, 3).Value
+End If
+
+If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+year_closed = ws.Cells(i, 6).Value
+End If
+
+    'setup integers for loop
+    Summary_Table_Row = 2
+
+    'loop
+        For i = 2 To ws.UsedRange.Rows.Count
+            
+            'find all the values
+            ticker = ws.Cells(i, 1).Value
+            vol = ws.Cells(i, 7).Value
+
+            year_open = ws.Cells(i, 3).Value
+            year_close = ws.Cells(i, 6).Value
+
+            yearly_change = year_close - year_open
+            percent_change = (year_close - year_open) / year_close
+
+            'insert values into summary
+            ws.Cells(Summary_Table_Row, 9).Value = ticker
+            ws.Cells(Summary_Table_Row, 10).Value = yearly_change
+            ws.Cells(Summary_Table_Row, 11).Value = percent_change
+            ws.Cells(Summary_Table_Row, 12).Value = vol
+            Summary_Table_Row = Summary_Table_Row + 1
+
+             vol = 0
+        
+        End If
+
+'finish loop
+    Next i
+    
+ws.Columns("K").NumberFormat = "0.00%"
+
+
+    'format columns colors
+    Dim rg As Range
+    Dim g As Long
+    Dim c As Long
+    Dim color_cell As Range
+    
+    Set rg = ws.Range("J2", Range("J2").End(xlDown))
+    c = rg.Cells.Count
+    
+    For g = 1 To c
+    Set color_cell = rg(g)
+    Select Case color_cell
+        Case Is >= 0
+            With color_cell
+                .Interior.Color = vbGreen
+            End With
+        Case Is < 0
+            With color_cell
+                .Interior.Color = vbRed
+            End With
+       End Select
+    Next g
+
+
+
+
+'move to next worksheet
+Next ws
+
+
+End Sub
+
+
+
